@@ -86,11 +86,11 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - "./configs/:/var/www/MISP/app/Config/"
-      - "./logs/:/var/www/MISP/app/tmp/logs/"
-      - "./files/:/var/www/MISP/app/files/"
+      - "./configs/:/var/www/infitip-engine/app/Config/"
+      - "./logs/:/var/www/infitip-engine/app/tmp/logs/"
+      - "./files/:/var/www/infitip-engine/app/files/"
       - "./ssl/:/etc/nginx/certs/"
-      - "./gnupg/:/var/www/MISP/.gnupg/"
+      - "./gnupg/:/var/www/infitip-engine/.gnupg/"
       # customize by replacing ${CUSTOM_PATH} with a path containing 'files/customize_misp.sh'
       # - "${CUSTOM_PATH}/:/custom/"
       # mount custom ca root certificates

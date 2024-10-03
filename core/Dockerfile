@@ -1,7 +1,6 @@
 ARG DOCKER_HUB_PROXY=""
 
-
-FROM "${DOCKER_HUB_PROXY}python:3.12-slim-bookworm" AS php-base
+FROM "${DOCKER_HUB_PROXY}python:3.8-slim-bookworm" AS php-base
     ENV DEBIAN_FRONTEND noninteractive
 
     # Uncomment when building in corporate environments
@@ -59,7 +58,8 @@ FROM php-base AS composer-build
 
 FROM php-base AS php-build
     ENV DEBIAN_FRONTEND noninteractive
-    ENV TZ Etc/UTC
+    # ENV TZ Etc/UTC
+	ENV TZ Asia/Kolkata
 
     RUN apt-get install -y --no-install-recommends \
         gcc \
@@ -110,12 +110,15 @@ FROM php-base AS python-build
 
     # Download MISP using git in the /var/www/ directory. Remove unnecessary items.
     RUN <<-EOF
-        if [ ! -z "${CORE_COMMIT}" ]; then
-            git clone https://github.com/MISP/MISP.git /var/www/MISP && cd /var/www/MISP && git checkout "${CORE_COMMIT}"
-        else
-            git clone --branch "${CORE_TAG}" --depth 1 https://github.com/MISP/MISP.git /var/www/MISP
-        fi
-        cd /var/www/MISP || exit; git submodule update --init --recursive .
+        #if [ ! -z "${CORE_COMMIT}" ]; then
+        #    git clone https://github.com/MISP/MISP.git /var/www/infitip-engine && cd /var/www/infitip-engine && git checkout "${CORE_COMMIT}"
+        #else
+        #    git clone --branch "${CORE_TAG}" --depth 1 https://github.com/MISP/MISP.git /var/www/infitip-engine
+        #fi	
+        #cd /var/www/infitip-engine || exit; git submodule update --init --recursive .
+		
+		git clone https://github.com/infinity-labs-dev/infitip.git /var/www/infitip-engine && cd /var/www/infitip-engine
+		cd /var/www/infitip-engine || exit; git submodule update --init --recursive .	
 EOF
 
     RUN <<-EOF
@@ -134,36 +137,36 @@ EOF
         for mod in "$@"; do
             mod_version_var=$(echo "PYPI_${mod}_VERSION" | tr '[:lower:]' '[:upper:]' | tr '-' '_')
             mod_version=$(eval "echo \"\$$mod_version_var\"")
-            grep -q ${mod} /var/www/MISP/requirements.txt
+            grep -q ${mod} /var/www/infitip-engine/requirements.txt
             exists=$?
             if [ "${exists}" -eq "1" ]; then
                 echo "Adding missing module ${mod} with version '${mod_version}'"
-                echo ${mod}${mod_version} >> /var/www/MISP/requirements.txt
+                echo ${mod}${mod_version} >> /var/www/infitip-engine/requirements.txt
             else
                 if [ "$(echo ${mod_version} | wc -m)" -gt 1 ]; then
                     echo "Overwriting existing module ${mod}, version '${mod_version}'"
-                    sed -i "/${mod}/s/.*/${mod}${mod_version}/" /var/www/MISP/requirements.txt
+                    sed -i "/${mod}/s/.*/${mod}${mod_version}/" /var/www/infitip-engine/requirements.txt
                 else
                     echo "Skipping overwriting ${mod} due to missing version variable"
                 fi
             fi
         done;
 
-        pip wheel --no-cache-dir -w /wheels/ -r /var/www/MISP/requirements.txt
+        pip wheel --no-cache-dir -w /wheels/ -r /var/www/infitip-engine/requirements.txt
 
         # Remove files we do not care for
-        find /var/www/MISP/INSTALL/* ! -name 'MYSQL.sql' -type f -exec rm {} +
-        find /var/www/MISP/INSTALL/* ! -name 'MYSQL.sql' -type l -exec rm {} +
+        find /var/www/infitip-engine/INSTALL/* ! -name 'MYSQL.sql' -type f -exec rm {} +
+        find /var/www/infitip-engine/INSTALL/* ! -name 'MYSQL.sql' -type l -exec rm {} +
         # Remove most files in .git - we do not use git functionality in docker
-        find /var/www/MISP/.git/* ! -name HEAD -exec rm -rf {} +
+        find /var/www/infitip-engine/.git/* ! -name HEAD -exec rm -rf {} +
         # Remove libraries submodules
-        rm -r /var/www/MISP/PyMISP
-        rm -r /var/www/MISP/app/files/scripts/cti-python-stix2
-        rm -r /var/www/MISP/app/files/scripts/misp-stix
-        rm -r /var/www/MISP/app/files/scripts/mixbox
-        rm -r /var/www/MISP/app/files/scripts/python-cybox
-        rm -r /var/www/MISP/app/files/scripts/python-maec
-        rm -r /var/www/MISP/app/files/scripts/python-stix
+        rm -r /var/www/infitip-engine/PyMISP
+        rm -r /var/www/infitip-engine/app/files/scripts/cti-python-stix2
+        rm -r /var/www/infitip-engine/app/files/scripts/misp-stix
+        rm -r /var/www/infitip-engine/app/files/scripts/mixbox
+        rm -r /var/www/infitip-engine/app/files/scripts/python-cybox
+        rm -r /var/www/infitip-engine/app/files/scripts/python-maec
+        rm -r /var/www/infitip-engine/app/files/scripts/python-stix
 EOF
 
 
@@ -223,10 +226,10 @@ FROM php-base
     COPY --from=php-build ["/usr/lib/php/${PHP_VER}/ssdeep.so", "/usr/lib/php/${PHP_VER}/rdkafka.so", "/usr/lib/php/${PHP_VER}/brotli.so", "/usr/lib/php/${PHP_VER}/simdjson.so", "/usr/lib/php/${PHP_VER}/zstd.so", "/usr/lib/php/${PHP_VER}/"]
 
     # Do an early chown to limit image size
-    COPY --from=python-build --chown=www-data:www-data --chmod=0550 /var/www/MISP /var/www/MISP
-    COPY --from=composer-build --chown=www-data:www-data --chmod=0550 /tmp/composer.lock /var/www/MISP/app/composer.lock
-    COPY --from=composer-build --chown=www-data:www-data --chmod=0550 /tmp/Vendor /var/www/MISP/app/Vendor
-    COPY --from=composer-build --chown=www-data:www-data --chmod=0550 /tmp/Plugin /var/www/MISP/app/Plugin
+    COPY --from=python-build --chown=www-data:www-data --chmod=0550 /var/www/infitip-engine /var/www/infitip-engine
+    COPY --from=composer-build --chown=www-data:www-data --chmod=0550 /tmp/composer.lock /var/www/infitip-engine/app/composer.lock
+    COPY --from=composer-build --chown=www-data:www-data --chmod=0550 /tmp/Vendor /var/www/infitip-engine/app/Vendor
+    COPY --from=composer-build --chown=www-data:www-data --chmod=0550 /tmp/Plugin /var/www/infitip-engine/app/Plugin
 
     # 'setuptools' is needed at runtime by 'mixbox'
     RUN pip install setuptools
@@ -259,13 +262,13 @@ EOF
     #   3) Directories writable, because sometimes MISP add new files
 
     RUN <<-EOF
-        cp -R /var/www/MISP/app/files /var/www/MISP/app/files.dist
-        cp -R /var/www/MISP/app/Config /var/www/MISP/app/Config.dist
-        find /var/www/MISP \( ! -user www-data -or ! -group www-data \) -exec chown www-data:www-data '{}' +;
-        find /var/www/MISP -not -perm 550 -type f -exec chmod 0550 '{}' +;
-        find /var/www/MISP -not -perm 770 -type d -exec chmod 0770 '{}' +;
+        cp -R /var/www/infitip-engine/app/files /var/www/infitip-engine/app/files.dist
+        cp -R /var/www/infitip-engine/app/Config /var/www/infitip-engine/app/Config.dist
+        find /var/www/infitip-engine \( ! -user www-data -or ! -group www-data \) -exec chown www-data:www-data '{}' +;
+        find /var/www/infitip-engine -not -perm 550 -type f -exec chmod 0550 '{}' +;
+        find /var/www/infitip-engine -not -perm 770 -type d -exec chmod 0770 '{}' +;
         # Diagnostics wants this file to be present and writable even if we do not use git in docker land
-        touch /var/www/MISP/.git/ORIG_HEAD && chmod 0600 /var/www/MISP/.git/ORIG_HEAD && chown www-data:www-data /var/www/MISP/.git/ORIG_HEAD
+        touch /var/www/infitip-engine/.git/ORIG_HEAD && chmod 0600 /var/www/infitip-engine/.git/ORIG_HEAD && chown www-data:www-data /var/www/infitip-engine/.git/ORIG_HEAD
 EOF
 
     # Copy all our image specific files to appropriate locations
@@ -273,4 +276,4 @@ EOF
     ENTRYPOINT [ "/entrypoint.sh" ]
 
     # Change Workdirectory
-    WORKDIR /var/www/MISP
+    WORKDIR /var/www/infitip-engine
