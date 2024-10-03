@@ -237,10 +237,10 @@ FROM php-base
 
     # 'setuptools' is needed at runtime by 'mixbox'
     RUN pip install setuptools
-    RUN cp /usr/local/lib/python3.12/site-packages/setuptools/_distutils/version.py \
-        /usr/local/lib/python3.12/site-packages/mixbox/distutils_version.py
+    RUN cp /usr/local/lib/python3.8/site-packages/setuptools/_distutils/version.py \
+        /usr/local/lib/python3.8/site-packages/mixbox/distutils_version.py
     RUN sed -i 's/from distutils\.version/from mixbox.distutils_version/' \
-        /usr/local/lib/python3.12/site-packages/mixbox/parser.py
+        /usr/local/lib/python3.8/site-packages/mixbox/parser.py
     RUN pip uninstall -y setuptools pip
 
     # Gather these in one layer, only act on actual directories under /etc/php/
