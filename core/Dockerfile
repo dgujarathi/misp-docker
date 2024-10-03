@@ -40,7 +40,8 @@ FROM php-base AS composer-build
         && apt-get autoremove -y && apt-get clean -y && rm -rf /var/lib/apt/lists/*
 
     WORKDIR /tmp
-    ADD https://raw.githubusercontent.com/MISP/MISP/${CORE_COMMIT:-${CORE_TAG}}/app/composer.json /tmp
+    #ADD https://raw.githubusercontent.com/MISP/MISP/${CORE_COMMIT:-${CORE_TAG}}/app/composer.json /tmp
+	COPY infitip/app/composer.json /tmp
     COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
     RUN composer config --no-interaction allow-plugins.composer/installers true
     RUN composer install
@@ -117,8 +118,11 @@ FROM php-base AS python-build
         #fi	
         #cd /var/www/infitip-engine || exit; git submodule update --init --recursive .
 		
-		git clone https://github.com/infinity-labs-dev/infitip.git /var/www/infitip-engine && cd /var/www/infitip-engine
-		cd /var/www/infitip-engine || exit; git submodule update --init --recursive .	
+		#git clone https://github.com/infinity-labs-dev/infitip.git /var/www/infitip-engine && cd /var/www/infitip-engine
+		#cd /var/www/infitip-engine || exit; git submodule update --init --recursive .	
+		
+		COPY infitip/ /var/www/infitip-engine
+		cd /var/www/infitip-engine || exit; git submodule update --init --recursive .
 EOF
 
     RUN <<-EOF
