@@ -110,6 +110,7 @@ FROM php-base AS python-build
         && apt-get autoremove -y && apt-get clean -y && rm -rf /var/lib/apt/lists/*
 
     # Download MISP using git in the /var/www/ directory. Remove unnecessary items.
+	COPY infitip/ /var/www/infitip-engine
     RUN <<-EOF
         #if [ ! -z "${CORE_COMMIT}" ]; then
         #    git clone https://github.com/MISP/MISP.git /var/www/infitip-engine && cd /var/www/infitip-engine && git checkout "${CORE_COMMIT}"
@@ -119,9 +120,8 @@ FROM php-base AS python-build
         #cd /var/www/infitip-engine || exit; git submodule update --init --recursive .
 		
 		#git clone https://github.com/infinity-labs-dev/infitip.git /var/www/infitip-engine && cd /var/www/infitip-engine
-		#cd /var/www/infitip-engine || exit; git submodule update --init --recursive .	
+		#cd /var/www/infitip-engine || exit; git submodule update --init --recursive .		
 		
-		COPY infitip/ /var/www/infitip-engine
 		cd /var/www/infitip-engine || exit; git submodule update --init --recursive .
 EOF
 
