@@ -1,5 +1,5 @@
 # define the root dir
-root /var/www/MISP/app/webroot;
+root /var/www/infitip-engine/app/webroot;
 index index.php;
 
 # incrase the maximum body size

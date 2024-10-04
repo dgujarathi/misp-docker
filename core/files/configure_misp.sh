@@ -12,7 +12,7 @@ export SETTING_EMAIL="${MISP_EMAIL-$ADMIN_EMAIL}"
 
 init_minimum_config() {
     # Temporarily disable DB to apply config file settings, reenable after if needed 
-    sudo -u www-data /var/www/MISP/app/Console/cake Admin setSetting -q "MISP.system_setting_db" false
+    sudo -u www-data /var/www/infitip-engine/app/Console/cake Admin setSetting -q "MISP.system_setting_db" false
     init_settings "minimum_config"
 }
 
@@ -32,8 +32,8 @@ configure_gnupg() {
         return
     fi
 
-    export GPG_DIR=/var/www/MISP/.gnupg
-    GPG_ASC=/var/www/MISP/app/webroot/gpg.asc
+    export GPG_DIR=/var/www/infitip-engine/.gnupg
+    GPG_ASC=/var/www/infitip-engine/app/webroot/gpg.asc
     GPG_TMP=/tmp/gpg.tmp
 
     if [ ! -f "${GPG_DIR}/trustdb.gpg" ]; then
@@ -85,13 +85,13 @@ set_up_oidc() {
     # OIDC_ISSUER may be empty
     check_env_vars OIDC_PROVIDER_URL OIDC_CLIENT_ID OIDC_CLIENT_SECRET OIDC_ROLES_PROPERTY OIDC_ROLES_MAPPING OIDC_DEFAULT_ORG
 
-    sudo -u www-data php /var/www/MISP/tests/modify_config.php modify "{
+    sudo -u www-data php /var/www/infitip-engine/tests/modify_config.php modify "{
         \"Security\": {
             \"auth\": [\"OidcAuth.Oidc\"]
         }
     }" > /dev/null
 
-    sudo -u www-data php /var/www/MISP/tests/modify_config.php modify "{
+    sudo -u www-data php /var/www/infitip-engine/tests/modify_config.php modify "{
         \"OidcAuth\": {
             \"provider_url\": \"${OIDC_PROVIDER_URL}\",
             ${OIDC_ISSUER:+\"issuer\": \"${OIDC_ISSUER}\",}
@@ -105,13 +105,13 @@ set_up_oidc() {
 
     # Set the custom logout URL for the OIDC plugin only if OIDC_LOGOUT_URL is defined
     if [[ -n "${OIDC_LOGOUT_URL}" ]]; then
-        sudo -u www-data /var/www/MISP/app/Console/cake Admin setSetting -q "Plugin.CustomAuth_custom_logout" "${OIDC_LOGOUT_URL}&post_logout_redirect_uri=${BASE_URL}/users/login"
+        sudo -u www-data /var/www/infitip-engine/app/Console/cake Admin setSetting -q "Plugin.CustomAuth_custom_logout" "${OIDC_LOGOUT_URL}&post_logout_redirect_uri=${BASE_URL}/users/login"
     else
         echo "OIDC_LOGOUT_URL is not set"
     fi
 
     # Disable password confirmation as stated at https://github.com/MISP/MISP/issues/8116
-    sudo -u www-data /var/www/MISP/app/Console/cake Admin setSetting -q "Security.require_password_confirmation" false
+    sudo -u www-data /var/www/infitip-engine/app/Console/cake Admin setSetting -q "Security.require_password_confirmation" false
 }
 
 set_up_ldap() {
@@ -124,7 +124,7 @@ set_up_ldap() {
     # LDAP_SEARCH_FILTER may be empty
     check_env_vars LDAP_APACHE_ENV LDAP_SERVER LDAP_STARTTLS LDAP_READER_USER LDAP_READER_PASSWORD LDAP_DN LDAP_SEARCH_ATTRIBUTE LDAP_FILTER LDAP_DEFAULT_ROLE_ID LDAP_DEFAULT_ORG LDAP_OPT_PROTOCOL_VERSION LDAP_OPT_NETWORK_TIMEOUT LDAP_OPT_REFERRALS 
 
-    sudo -u www-data php /var/www/MISP/tests/modify_config.php modify "{
+    sudo -u www-data php /var/www/infitip-engine/tests/modify_config.php modify "{
         \"ApacheSecureAuth\": {
             \"apacheEnv\": \"${LDAP_APACHE_ENV}\",
             \"ldapServer\": \"${LDAP_SERVER}\",
@@ -145,7 +145,7 @@ set_up_ldap() {
     }" > /dev/null
 
     # Disable password confirmation as stated at https://github.com/MISP/MISP/issues/8116
-    sudo -u www-data /var/www/MISP/app/Console/cake Admin setSetting -q "Security.require_password_confirmation" false
+    sudo -u www-data /var/www/infitip-engine/app/Console/cake Admin setSetting -q "Security.require_password_confirmation" false
 }
 
 set_up_aad() {
@@ -161,14 +161,14 @@ set_up_aad() {
     # existing loadAll() call in bootstrap.php already loads all available Cake plugins
 
     # Set auth mechanism to AAD in config.php file
-    sudo -u www-data php /var/www/MISP/tests/modify_config.php modify "{
+    sudo -u www-data php /var/www/infitip-engine/tests/modify_config.php modify "{
         \"Security\": {
             \"auth\": [\"AadAuth.AadAuthenticate\"]
         }
     }" > /dev/null
 
     # Configure AAD auth settings from environment variables in config.php file
-    sudo -u www-data php /var/www/MISP/tests/modify_config.php modify "{
+    sudo -u www-data php /var/www/infitip-engine/tests/modify_config.php modify "{
         \"AadAuth\": {
             \"client_id\": \"${AAD_CLIENT_ID}\",
             \"ad_tenant\": \"${AAD_TENANT_ID}\",
@@ -185,12 +185,12 @@ set_up_aad() {
 
     # Disable self-management, username change, and password change to prevent users from circumventing AAD login flow
     # Recommended per https://github.com/MISP/MISP/blob/2.4/app/Plugin/AadAuth/README.md
-    sudo -u www-data /var/www/MISP/app/Console/cake Admin setSetting -q "MISP.disableUserSelfManagement" true
-    sudo -u www-data /var/www/MISP/app/Console/cake Admin setSetting -q "MISP.disable_user_login_change" true
-    sudo -u www-data /var/www/MISP/app/Console/cake Admin setSetting -q "MISP.disable_user_password_change" true
+    sudo -u www-data /var/www/infitip-engine/app/Console/cake Admin setSetting -q "MISP.disableUserSelfManagement" true
+    sudo -u www-data /var/www/infitip-engine/app/Console/cake Admin setSetting -q "MISP.disable_user_login_change" true
+    sudo -u www-data /var/www/infitip-engine/app/Console/cake Admin setSetting -q "MISP.disable_user_password_change" true
 
     # Disable password confirmation as stated at https://github.com/MISP/MISP/issues/8116
-    sudo -u www-data /var/www/MISP/app/Console/cake Admin setSetting -q "Security.require_password_confirmation" false
+    sudo -u www-data /var/www/infitip-engine/app/Console/cake Admin setSetting -q "Security.require_password_confirmation" false
 }
 
 set_up_proxy() {
@@ -204,16 +204,16 @@ set_up_proxy() {
 
 apply_updates() {
     # Disable 'ZeroMQ_enable' to get better logs when applying updates
-#    sudo -u www-data /var/www/MISP/app/Console/cake Admin setSetting -q "Plugin.ZeroMQ_enable" false
+#    sudo -u www-data /var/www/infitip-engine/app/Console/cake Admin setSetting -q "Plugin.ZeroMQ_enable" false
     # Run updates (strip colors since output might end up in a log)
-    sudo -u www-data /var/www/MISP/app/Console/cake Admin runUpdates | stdbuf -oL sed -r "s/[[:cntrl:]]\[[0-9]{1,3}m//g"
+    sudo -u www-data /var/www/infitip-engine/app/Console/cake Admin runUpdates | stdbuf -oL sed -r "s/[[:cntrl:]]\[[0-9]{1,3}m//g"
     # Re-enable 'ZeroMQ_enable'
-#    sudo -u www-data /var/www/MISP/app/Console/cake Admin setSetting -q "Plugin.ZeroMQ_enable" true
+#    sudo -u www-data /var/www/infitip-engine/app/Console/cake Admin setSetting -q "Plugin.ZeroMQ_enable" true
 }
 
 init_user() {
     # Create the main user if it is not there already
-    sudo -u www-data /var/www/MISP/app/Console/cake user init -q > /dev/null 2>&1
+    sudo -u www-data /var/www/infitip-engine/app/Console/cake user init -q > /dev/null 2>&1
 
     echo "UPDATE $MYSQL_DATABASE.users SET email = \"${ADMIN_EMAIL}\" WHERE id = 1;" | ${MYSQL_CMD}
 
@@ -223,10 +223,10 @@ init_user() {
 
     if [ -n "$ADMIN_KEY" ]; then
         echo "... setting admin key to '${ADMIN_KEY}'"
-        CHANGE_CMD=(sudo -u www-data /var/www/MISP/app/Console/cake User change_authkey 1 "${ADMIN_KEY}")
+        CHANGE_CMD=(sudo -u www-data /var/www/infitip-engine/app/Console/cake User change_authkey 1 "${ADMIN_KEY}")
     elif [ -z "$ADMIN_KEY" ] && [ "$AUTOGEN_ADMIN_KEY" == "true" ]; then
         echo "... regenerating admin key (set \$ADMIN_KEY if you want it to change)"
-        CHANGE_CMD=(sudo -u www-data /var/www/MISP/app/Console/cake User change_authkey 1)
+        CHANGE_CMD=(sudo -u www-data /var/www/infitip-engine/app/Console/cake User change_authkey 1)
     else
         echo "... admin user key auto generation disabled"
     fi
@@ -238,13 +238,13 @@ init_user() {
 
     if [ ! -z "$ADMIN_PASSWORD" ]; then
         echo "... setting admin password to '${ADMIN_PASSWORD}'"
-        PASSWORD_POLICY=$(sudo -u www-data /var/www/MISP/app/Console/cake Admin getSetting "Security.password_policy_complexity" | jq ".value" -r)
-        PASSWORD_LENGTH=$(sudo -u www-data /var/www/MISP/app/Console/cake Admin getSetting "Security.password_policy_length" | jq ".value" -r)
-        sudo -u www-data /var/www/MISP/app/Console/cake Admin setSetting -q "Security.password_policy_length" 1
-        sudo -u www-data /var/www/MISP/app/Console/cake Admin setSetting -q "Security.password_policy_complexity" '/.*/'
-        sudo -u www-data /var/www/MISP/app/Console/cake User change_pw "${ADMIN_EMAIL}" "${ADMIN_PASSWORD}"
-        sudo -u www-data /var/www/MISP/app/Console/cake Admin setSetting -q "Security.password_policy_complexity" "${PASSWORD_POLICY}"
-        sudo -u www-data /var/www/MISP/app/Console/cake Admin setSetting -q "Security.password_policy_length" "${PASSWORD_LENGTH}"
+        PASSWORD_POLICY=$(sudo -u www-data /var/www/infitip-engine/app/Console/cake Admin getSetting "Security.password_policy_complexity" | jq ".value" -r)
+        PASSWORD_LENGTH=$(sudo -u www-data /var/www/infitip-engine/app/Console/cake Admin getSetting "Security.password_policy_length" | jq ".value" -r)
+        sudo -u www-data /var/www/infitip-engine/app/Console/cake Admin setSetting -q "Security.password_policy_length" 1
+        sudo -u www-data /var/www/infitip-engine/app/Console/cake Admin setSetting -q "Security.password_policy_complexity" '/.*/'
+        sudo -u www-data /var/www/infitip-engine/app/Console/cake User change_pw "${ADMIN_EMAIL}" "${ADMIN_PASSWORD}"
+        sudo -u www-data /var/www/infitip-engine/app/Console/cake Admin setSetting -q "Security.password_policy_complexity" "${PASSWORD_POLICY}"
+        sudo -u www-data /var/www/infitip-engine/app/Console/cake Admin setSetting -q "Security.password_policy_length" "${PASSWORD_LENGTH}"
     else
         echo "... setting admin password skipped"
     fi
@@ -255,10 +255,10 @@ apply_critical_fixes() {
     init_settings "critical"
 
     # Kludge for handling Security.auth array.  Unrecognised by tools like cake admin setsetting.
-    local config_json=$(echo '<?php require_once "/var/www/MISP/app/Config/config.php"; echo json_encode($config, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>'|/usr/bin/php)
+    local config_json=$(echo '<?php require_once "/var/www/infitip-engine/app/Config/config.php"; echo json_encode($config, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>'|/usr/bin/php)
     if $(echo $config_json |jq -e 'getpath(("Security.auth" | split("."))) == null'); then
         echo "Updating unset critical setting 'Security.auth' to 'Array()'..."
-        sudo -u www-data php /var/www/MISP/tests/modify_config.php modify "{
+        sudo -u www-data php /var/www/infitip-engine/tests/modify_config.php modify "{
             \"Security\": {
                 \"auth\": {}
             }
@@ -275,7 +275,7 @@ apply_optional_fixes() {
 # Leaving this here though in case the serverSettings model for those odd settings is fixed one day.
 #setting_is_set() {
 #    local setting="$1"
-#    local current_value="$(sudo -u www-data /var/www/MISP/app/Console/cake Admin getSetting $setting)"
+#    local current_value="$(sudo -u www-data /var/www/infitip-engine/app/Console/cake Admin getSetting $setting)"
 #    local error_value="$(jq -r '.errorMessage' <<< $current_value)"
 #
 #    if [[ "$current_value" =~ ^\{.*\}$ && "$error_value" != "Value not set." && "$error_value" != Invalid* ]]; then
@@ -293,19 +293,19 @@ update_components() {
             UPDATE_SUDO_CMD="sudo -b -u www-data"
         fi
     fi
-    ${UPDATE_SUDO_CMD} /var/www/MISP/app/Console/cake Admin updateGalaxies
-    ${UPDATE_SUDO_CMD} /var/www/MISP/app/Console/cake Admin updateTaxonomies
-    ${UPDATE_SUDO_CMD} /var/www/MISP/app/Console/cake Admin updateWarningLists
-    ${UPDATE_SUDO_CMD} /var/www/MISP/app/Console/cake Admin updateNoticeLists
-    ${UPDATE_SUDO_CMD} /var/www/MISP/app/Console/cake Admin updateObjectTemplates "$CRON_USER_ID"
+    ${UPDATE_SUDO_CMD} /var/www/infitip-engine/app/Console/cake Admin updateGalaxies
+    ${UPDATE_SUDO_CMD} /var/www/infitip-engine/app/Console/cake Admin updateTaxonomies
+    ${UPDATE_SUDO_CMD} /var/www/infitip-engine/app/Console/cake Admin updateWarningLists
+    ${UPDATE_SUDO_CMD} /var/www/infitip-engine/app/Console/cake Admin updateNoticeLists
+    ${UPDATE_SUDO_CMD} /var/www/infitip-engine/app/Console/cake Admin updateObjectTemplates "$CRON_USER_ID"
 }
 
 update_ca_certificates() {
     # Upgrade host os certificates
     update-ca-certificates
     # Upgrade cake cacert.pem file from Mozilla project
-    echo "Updating /var/www/MISP/app/Lib/cakephp/lib/Cake/Config/cacert.pem..."
-    sudo -E -u www-data curl -s --etag-compare /var/www/MISP/app/Lib/cakephp/lib/Cake/Config/etag.txt --etag-save /var/www/MISP/app/Lib/cakephp/lib/Cake/Config/etag.txt https://curl.se/ca/cacert.pem -o /var/www/MISP/app/Lib/cakephp/lib/Cake/Config/cacert.pem
+    echo "Updating /var/www/infitip-engine/app/Lib/cakephp/lib/Cake/Config/cacert.pem..."
+    sudo -E -u www-data curl -s --etag-compare /var/www/infitip-engine/app/Lib/cakephp/lib/Cake/Config/etag.txt --etag-save /var/www/infitip-engine/app/Lib/cakephp/lib/Cake/Config/etag.txt https://curl.se/ca/cacert.pem -o /var/www/infitip-engine/app/Lib/cakephp/lib/Cake/Config/cacert.pem
 }
 
 create_sync_servers() {
@@ -388,4 +388,4 @@ echo "MISP | Set Up AAD ..." && set_up_aad
 echo "MISP | Set Up Proxy ..." && set_up_proxy
 
 echo "MISP | Mark instance live"
-sudo -u www-data /var/www/MISP/app/Console/cake Admin live 1
+sudo -u www-data /var/www/infitip-engine/app/Console/cake Admin live 1
