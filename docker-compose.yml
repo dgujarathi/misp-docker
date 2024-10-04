@@ -26,10 +26,10 @@ services:
     image: mariadb:10.11
     restart: always
     environment:
-      - "MYSQL_USER=${MYSQL_USER:-misp}"
-      - "MYSQL_PASSWORD=${MYSQL_PASSWORD:-example}"
-      - "MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-password}"
-      - "MYSQL_DATABASE=${MYSQL_DATABASE:-misp}"
+      - "MYSQL_USER=${MYSQL_USER:-infitipdocker}"
+      - "MYSQL_PASSWORD=${MYSQL_PASSWORD:-hcl@123}"
+      - "MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-Passw0rd}"
+      - "MYSQL_DATABASE=${MYSQL_DATABASE:-infitiphcl}"
     command: "\
       --innodb-buffer-pool-size=${INNODB_BUFFER_POOL_SIZE:-2048M} \
       --innodb-change-buffering=${INNODB_CHANGE_BUFFERING:-none} \
@@ -49,8 +49,8 @@ services:
       timeout: 1s
       retries: 3
       start_period: 30s
-    ports:
-      - "3306:3306"
+    #ports:
+    #  - "3306:3306"
 
   misp-core:
     image: ghcr.io/misp/misp-docker/misp-core:${CORE_RUNNING_TAG:-latest}
@@ -174,9 +174,9 @@ services:
       # mysql settings
       - "MYSQL_HOST=${MYSQL_HOST:-db}"
       - "MYSQL_PORT=${MYSQL_PORT:-3306}"
-      - "MYSQL_USER=${MYSQL_USER:-misp}"
-      - "MYSQL_PASSWORD=${MYSQL_PASSWORD:-example}"
-      - "MYSQL_DATABASE=${MYSQL_DATABASE:-misp}"
+      - "MYSQL_USER=${MYSQL_USER:-infitipdocker}"
+      - "MYSQL_PASSWORD=${MYSQL_PASSWORD:-hcl@123}"
+      - "MYSQL_DATABASE=${MYSQL_DATABASE:-infitiphcl}"
       # redis settings
       - "REDIS_HOST=${REDIS_HOST:-redis}"
       - "REDIS_PORT=${REDIS_PORT:-6379}"
