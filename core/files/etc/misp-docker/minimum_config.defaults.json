@@ -1,9 +1,9 @@
 {
   "MISP.tmpdir": {
-    "default_value": "/var/www/MISP/app/tmp"
+    "default_value": "/var/www/infitip-engine/app/tmp"
   },
   "MISP.attachments_dir": {
-    "default_value": "/var/www/MISP/app/files"
+    "default_value": "/var/www/infitip-engine/app/files"
   },
   "MISP.download_gpg_from_homedir": {
     "default_value": false

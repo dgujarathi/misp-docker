@@ -38,14 +38,14 @@ init_mysql(){
         export DB_ALREADY_INITIALISED=true
     else
         echo "... database has not been initialized, importing MySQL scheme..."
-        $MYSQL_CMD < /var/www/MISP/INSTALL/MYSQL.sql
+        $MYSQL_CMD < /var/www/infitip-engine/INSTALL/MYSQL.sql
     fi
 }
 
 init_misp_data_files(){
     # Init config (shared with host)
     echo "... initialize configuration files"
-    MISP_APP_CONFIG_PATH=/var/www/MISP/app/Config
+    MISP_APP_CONFIG_PATH=/var/www/infitip-engine/app/Config
     # workaround for https://forums.docker.com/t/sed-couldnt-open-temporary-file-xyz-permission-denied-when-using-virtiofs/125473
     # [ -f $MISP_APP_CONFIG_PATH/bootstrap.php ] || cp $MISP_APP_CONFIG_PATH.dist/bootstrap.default.php $MISP_APP_CONFIG_PATH/bootstrap.php
     # [ -f $MISP_APP_CONFIG_PATH/database.php ] || cp $MISP_APP_CONFIG_PATH.dist/database.default.php $MISP_APP_CONFIG_PATH/database.php
@@ -130,7 +130,7 @@ EOT
 
     # Init files (shared with host)
     echo "... initialize app files"
-    MISP_APP_FILES_PATH=/var/www/MISP/app/files
+    MISP_APP_FILES_PATH=/var/www/infitip-engine/app/files
     if [ ! -f ${MISP_APP_FILES_PATH}/INIT ]; then
         cp -R ${MISP_APP_FILES_PATH}.dist/* ${MISP_APP_FILES_PATH}
         touch ${MISP_APP_FILES_PATH}/INIT
@@ -138,41 +138,41 @@ EOT
 }
 
 update_misp_data_files(){
-    for DIR in $(ls /var/www/MISP/app/files.dist); do
+    for DIR in $(ls /var/www/infitip-engine/app/files.dist); do
         if [ "$DIR" = "certs" ] || [ "$DIR" = "img" ] || [ "$DIR" == "taxonomies" ] ; then
-            echo "... rsync -azh \"/var/www/MISP/app/files.dist/$DIR\" \"/var/www/MISP/app/files/\""
-            rsync -azh "/var/www/MISP/app/files.dist/$DIR" "/var/www/MISP/app/files/"
+            echo "... rsync -azh \"/var/www/infitip-engine/app/files.dist/$DIR\" \"/var/www/infitip-engine/app/files/\""
+            rsync -azh "/var/www/infitip-engine/app/files.dist/$DIR" "/var/www/infitip-engine/app/files/"
         else
-            echo "... rsync -azh --delete \"/var/www/MISP/app/files.dist/$DIR\" \"/var/www/MISP/app/files/\""
-            rsync -azh --delete "/var/www/MISP/app/files.dist/$DIR" "/var/www/MISP/app/files/"
+            echo "... rsync -azh --delete \"/var/www/infitip-engine/app/files.dist/$DIR\" \"/var/www/infitip-engine/app/files/\""
+            rsync -azh --delete "/var/www/infitip-engine/app/files.dist/$DIR" "/var/www/infitip-engine/app/files/"
         fi
     done
 }
 
 enforce_misp_data_permissions(){
-    echo "... chown -R www-data:www-data /var/www/MISP/app/tmp" && find /var/www/MISP/app/tmp \( ! -user www-data -or ! -group www-data \) -exec chown www-data:www-data {} +
+    echo "... chown -R www-data:www-data /var/www/infitip-engine/app/tmp" && find /var/www/infitip-engine/app/tmp \( ! -user www-data -or ! -group www-data \) -exec chown www-data:www-data {} +
     # Files are also executable and read only, because we have some rogue scripts like 'cake' and we can not do a full inventory
-    echo "... chmod -R 0550 files /var/www/MISP/app/tmp" && find /var/www/MISP/app/tmp -not -perm 550 -type f -exec chmod 0550 {} +
+    echo "... chmod -R 0550 files /var/www/infitip-engine/app/tmp" && find /var/www/infitip-engine/app/tmp -not -perm 550 -type f -exec chmod 0550 {} +
     # Directories are also writable, because there seems to be a requirement to add new files every once in a while
-    echo "... chmod -R 0770 directories /var/www/MISP/app/tmp" && find /var/www/MISP/app/tmp -not -perm 770 -type d -exec chmod 0770 {} +
+    echo "... chmod -R 0770 directories /var/www/infitip-engine/app/tmp" && find /var/www/infitip-engine/app/tmp -not -perm 770 -type d -exec chmod 0770 {} +
     # We make 'files' and 'tmp' (logs) directories and files user and group writable (we removed the SGID bit)
-    echo "... chmod -R u+w,g+w /var/www/MISP/app/tmp" && chmod -R u+w,g+w /var/www/MISP/app/tmp
+    echo "... chmod -R u+w,g+w /var/www/infitip-engine/app/tmp" && chmod -R u+w,g+w /var/www/infitip-engine/app/tmp
     
-    echo "... chown -R www-data:www-data /var/www/MISP/app/files" && find /var/www/MISP/app/files \( ! -user www-data -or ! -group www-data \) -exec chown www-data:www-data {} +
+    echo "... chown -R www-data:www-data /var/www/infitip-engine/app/files" && find /var/www/infitip-engine/app/files \( ! -user www-data -or ! -group www-data \) -exec chown www-data:www-data {} +
     # Files are also executable and read only, because we have some rogue scripts like 'cake' and we can not do a full inventory
-    echo "... chmod -R 0550 files /var/www/MISP/app/files" && find /var/www/MISP/app/files -not -perm 550 -type f -exec chmod 0550 {} +
+    echo "... chmod -R 0550 files /var/www/infitip-engine/app/files" && find /var/www/infitip-engine/app/files -not -perm 550 -type f -exec chmod 0550 {} +
     # Directories are also writable, because there seems to be a requirement to add new files every once in a while
-    echo "... chmod -R 0770 directories /var/www/MISP/app/files" && find /var/www/MISP/app/files -not -perm 770 -type d -exec chmod 0770 {} +
+    echo "... chmod -R 0770 directories /var/www/infitip-engine/app/files" && find /var/www/infitip-engine/app/files -not -perm 770 -type d -exec chmod 0770 {} +
     # We make 'files' and 'tmp' (logs) directories and files user and group writable (we removed the SGID bit)
-    echo "... chmod -R u+w,g+w /var/www/MISP/app/files" && chmod -R u+w,g+w /var/www/MISP/app/files
+    echo "... chmod -R u+w,g+w /var/www/infitip-engine/app/files" && chmod -R u+w,g+w /var/www/infitip-engine/app/files
     
-    echo "... chown -R www-data:www-data /var/www/MISP/app/Config" && find /var/www/MISP/app/Config \( ! -user www-data -or ! -group www-data \) -exec chown www-data:www-data {} +
+    echo "... chown -R www-data:www-data /var/www/infitip-engine/app/Config" && find /var/www/infitip-engine/app/Config \( ! -user www-data -or ! -group www-data \) -exec chown www-data:www-data {} +
     # Files are also executable and read only, because we have some rogue scripts like 'cake' and we can not do a full inventory
-    echo "... chmod -R 0550 files /var/www/MISP/app/Config ..." && find /var/www/MISP/app/Config -not -perm 550 -type f -exec chmod 0550 {} +
+    echo "... chmod -R 0550 files /var/www/infitip-engine/app/Config ..." && find /var/www/infitip-engine/app/Config -not -perm 550 -type f -exec chmod 0550 {} +
     # Directories are also writable, because there seems to be a requirement to add new files every once in a while
-    echo "... chmod -R 0770 directories /var/www/MISP/app/Config" && find /var/www/MISP/app/Config -not -perm 770 -type d -exec chmod 0770 {} +
+    echo "... chmod -R 0770 directories /var/www/infitip-engine/app/Config" && find /var/www/infitip-engine/app/Config -not -perm 770 -type d -exec chmod 0770 {} +
     # We make configuration files read only
-    echo "... chmod 600 /var/www/MISP/app/Config/{config,database,email}.php" && chmod 600 /var/www/MISP/app/Config/{config,database,email}.php
+    echo "... chmod 600 /var/www/infitip-engine/app/Config/{config,database,email}.php" && chmod 600 /var/www/infitip-engine/app/Config/{config,database,email}.php
 }
 
 flip_nginx() {
@@ -180,7 +180,7 @@ flip_nginx() {
     local reload="$2";
 
     if [[ "$live" = "true" ]]; then
-        NGINX_DOC_ROOT=/var/www/MISP/app/webroot
+        NGINX_DOC_ROOT=/var/www/infitip-engine/app/webroot
     elif [[ -x /custom/files/var/www/html/index.php ]]; then
         NGINX_DOC_ROOT=/custom/files/var/www/html/
     else

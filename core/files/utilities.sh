@@ -20,7 +20,7 @@ check_env_vars() {
 # Kludgy alternative to using cake Admin getSetting.
 setting_is_set_alt() {
     local setting="$1"
-    local config_json=$(echo '<?php require_once "/var/www/MISP/app/Config/config.php"; echo json_encode($config, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>'|/usr/bin/php)
+    local config_json=$(echo '<?php require_once "/var/www/infitip-engine/app/Config/config.php"; echo json_encode($config, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>'|/usr/bin/php)
     local db_settings_enabled=$(jq -e 'getpath(("MISP.system_setting_db" | split("."))) // false' <<< $config_json)
     local setting_in_config_file=$(jq -e 'getpath(("'"$setting"'" | split("."))) != null' <<< $config_json) 
     if $setting_in_config_file; then
@@ -53,7 +53,7 @@ enforce_env_settings() {
         local default_value="$(jq -r '."'"$setting"'"["default_value"]' <<< $settings_json)"
         local command_args="$(jq -r '."'"$setting"'"["command_args"] // ""' <<< $settings_json)"
         echo "Enforcing $description setting '$setting' to env var or default value '$default_value'..."
-        sudo -u www-data /var/www/MISP/app/Console/cake Admin setSetting -q $command_args "$setting" "$default_value"
+        sudo -u www-data /var/www/infitip-engine/app/Console/cake Admin setSetting -q $command_args "$setting" "$default_value"
     done
 }
 
@@ -65,7 +65,7 @@ set_safe_default() {
 
     if ! setting_is_set_alt "$setting"; then
         echo "Updating unset $description setting '$setting' to '$default_value'..."
-        sudo -u www-data /var/www/MISP/app/Console/cake Admin setSetting -q $command_args "$setting" "$default_value"
+        sudo -u www-data /var/www/infitip-engine/app/Console/cake Admin setSetting -q $command_args "$setting" "$default_value"
     fi
 }
 
