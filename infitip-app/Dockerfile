@@ -1,6 +1,6 @@
 ARG DOCKER_HUB_PROXY=""
 
-FROM "${DOCKER_HUB_PROXY}python:3.12-slim-bookworm" AS python-build
+FROM "${DOCKER_HUB_PROXY}python:3.10-slim-bookworm" AS python-build
     ENV DEBIAN_FRONTEND noninteractive
 
     # copy your local files to your
