@@ -41,7 +41,7 @@ services:
       --innodb-write-io-threads=${INNODB_WRITE_IO_THREADS:-4}"
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./dbdump/:/docker-entrypoint-initdb.d/
+      #- ./dbdump/:/docker-entrypoint-initdb.d/
 
     cap_add:
       - SYS_NICE  # CAP_SYS_NICE Prevent runaway mysql log
@@ -51,8 +51,8 @@ services:
       timeout: 1s
       retries: 3
       start_period: 30s
-    ports:
-      - "3306:3306"
+    #ports:
+    #  - "3306:3306"
 
   misp-core:
     image: ghcr.io/misp/misp-docker/misp-core:${CORE_RUNNING_TAG:-latest}
@@ -89,6 +89,7 @@ services:
     ports:
       - "80:80"
       - "443:443"
+      #- "3306:3306"
     volumes:
       - "./configs/:/var/www/infitip-engine/app/Config/"
       - "./logs/:/var/www/infitip-engine/app/tmp/logs/"
@@ -212,6 +213,19 @@ services:
       - "REDIS_PW=${REDIS_PASSWORD:-redispassword}"
     depends_on:
       redis:
+        condition: service_healthy
+
+  infitip-app:
+    image: infitip/infitip-app:latest
+    build: 
+      context: infitip-app/.
+    ports:
+      - "8001:8001"		  
+    depends_on:
+      misp-core:
+        condition: service_healthy
+      misp-modules:
+      db:
         condition: service_healthy
 
 volumes:

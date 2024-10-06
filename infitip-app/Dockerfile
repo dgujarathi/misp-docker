@@ -1,16 +1,31 @@
 ARG DOCKER_HUB_PROXY=""
 
-FROM "${DOCKER_HUB_PROXY}python:3.10-slim-bookworm" AS python-build
+FROM "${DOCKER_HUB_PROXY}python:3.8-slim-bookworm" AS python-build
     ENV DEBIAN_FRONTEND noninteractive
+
+    #RUN apt-get install python3-dev libmysqlclient-dev
+    # Install system dependencies required for mysqlclient
+    RUN apt-get update && apt-get install -y \
+        gcc \
+        build-essential \
+        default-libmysqlclient-dev \
+        libssl-dev \
+        python3-dev \
+        libffi-dev \
+        && apt-get clean
+
+    #RUN pip install setuptools
+    RUN pip install --upgrade pip setuptools wheel
 
     # copy your local files to your
     # docker container
     COPY app-revamp/ /var/www/infitip-app
+    COPY app-revamp/requirements.txt /tmp/requirements.txt
 
     # update your environment to work
     # within the folder you copied your 
     # files above into
-    WORKDIR /var/www/infitip-app
+    RUN cd /var/www/infitip-app
 
     # /opt: reserved for the installation of add-on application software packages.
     # We'll use this to create & store our virtual environment
@@ -20,10 +35,12 @@ FROM "${DOCKER_HUB_PROXY}python:3.10-slim-bookworm" AS python-build
 
     # Install requirments to new virtual environment
     # requirements.txt must have gunicorn & django
-    RUN /opt/venv/bin/pip install -r requirements.txt
+    RUN /opt/venv/bin/pip install --no-cache-dir -r /tmp/requirements.txt
 
-    RUN /opt/venv/bin/pip install pip --upgrade && \
-        /opt/venv/bin/pip install -r requirements.txt
+    #RUN /opt/venv/bin/pip install pip --upgrade && \
+    #    /opt/venv/bin/pip install -r requirements.txt
+
+   WORKDIR /var/www/infitip-app
 
     # entrypoint.sh will be discussed later.
     #CMD [ "/infitip-app/entrypoint.sh" ]
