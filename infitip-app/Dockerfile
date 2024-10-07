@@ -7,17 +7,6 @@ FROM "${DOCKER_HUB_PROXY}python:3.8-slim-bookworm" AS python-build
     ENV MYSQLCLIENT_CFLAGS="-I/usr/include/mysql"
     ENV MYSQLCLIENT_LDFLAGS="-L/usr/lib/x86_64-linux-gnu -lmysqlclient"
 
-    #RUN apt-get install python3-dev libmysqlclient-dev
-    # Install system dependencies required for mysqlclient
-    RUN apt-get update && apt-get install -y \
-        gcc \
-        build-essential \
-        default-libmysqlclient-dev \
-        libssl-dev \
-        python3-dev \
-        libffi-dev \
-        && apt-get clean
-
     RUN apt-get update && apt-get install -y \
         gcc \
         build-essential \
@@ -26,6 +15,7 @@ FROM "${DOCKER_HUB_PROXY}python:3.8-slim-bookworm" AS python-build
         default-libmysqlclient-dev \
         pkg-config \
         python3-dev \
+        nano \
         && apt-get clean
 
     #RUN pip install setuptools
@@ -35,6 +25,7 @@ FROM "${DOCKER_HUB_PROXY}python:3.8-slim-bookworm" AS python-build
     # docker container
     COPY app-revamp/ /var/www/infitip-app
     COPY app-revamp/requirements.txt /tmp/requirements.txt
+    COPY db-sql/ /tmp/
 
     # update your environment to work
     # within the folder you copied your 
