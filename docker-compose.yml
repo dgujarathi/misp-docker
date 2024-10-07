@@ -224,7 +224,6 @@ services:
     depends_on:
       misp-core:
         condition: service_healthy
-      misp-modules:
       db:
         condition: service_healthy
 

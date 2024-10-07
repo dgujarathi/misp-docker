@@ -2,6 +2,10 @@ ARG DOCKER_HUB_PROXY=""
 
 FROM "${DOCKER_HUB_PROXY}python:3.8-slim-bookworm" AS python-build
     ENV DEBIAN_FRONTEND noninteractive
+    
+    # Set environment variables for MySQL client build flags
+    ENV MYSQLCLIENT_CFLAGS="-I/usr/include/mysql"
+    ENV MYSQLCLIENT_LDFLAGS="-L/usr/lib/x86_64-linux-gnu -lmysqlclient"
 
     #RUN apt-get install python3-dev libmysqlclient-dev
     # Install system dependencies required for mysqlclient
@@ -12,6 +16,16 @@ FROM "${DOCKER_HUB_PROXY}python:3.8-slim-bookworm" AS python-build
         libssl-dev \
         python3-dev \
         libffi-dev \
+        && apt-get clean
+
+    RUN apt-get update && apt-get install -y \
+        gcc \
+        build-essential \
+        libssl-dev \
+        libffi-dev \
+        default-libmysqlclient-dev \
+        pkg-config \
+        python3-dev \
         && apt-get clean
 
     #RUN pip install setuptools
@@ -31,16 +45,18 @@ FROM "${DOCKER_HUB_PROXY}python:3.8-slim-bookworm" AS python-build
     # We'll use this to create & store our virtual environment
 
     # Create a virtual environment in /opt
-    RUN python3 -m venv /opt/venv
+    #RUN python3 -m venv /opt/venv
 
     # Install requirments to new virtual environment
     # requirements.txt must have gunicorn & django
-    RUN /opt/venv/bin/pip install --no-cache-dir -r /tmp/requirements.txt
+    #RUN /opt/venv/bin/pip install --no-cache-dir -r /tmp/requirements.txt
+    RUN pip install --no-cache-dir -r /tmp/requirements.txt
 
     #RUN /opt/venv/bin/pip install pip --upgrade && \
     #    /opt/venv/bin/pip install -r requirements.txt
 
-   WORKDIR /var/www/infitip-app
+    WORKDIR /var/www/infitip-app
+    #RUN pip install Django==4.2.11
 
     # entrypoint.sh will be discussed later.
     #CMD [ "/infitip-app/entrypoint.sh" ]
