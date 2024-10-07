@@ -54,7 +54,7 @@ services:
     #ports:
     #  - "3306:3306"
 
-  misp-core:
+  infitip-engine:
     image: ghcr.io/misp/misp-docker/misp-core:${CORE_RUNNING_TAG:-latest}
     cap_add:
       - AUDIT_WRITE
@@ -198,7 +198,7 @@ services:
       - "PHP_POST_MAX_SIZE=${PHP_POST_MAX_SIZE:-50M}"
       - "PHP_MAX_INPUT_TIME:${PHP_MAX_INPUT_TIME:-300}"
   
-  misp-modules:
+  infitip-modules:
     image: ghcr.io/misp/misp-docker/misp-modules:${MODULES_RUNNING_TAG:-latest}
     build:
       context: modules/.
@@ -221,7 +221,7 @@ services:
     ports:
       - "8001:8001"		  
     depends_on:
-      misp-core:
+      infitip-engine:
         condition: service_healthy
       db:
         condition: service_healthy
