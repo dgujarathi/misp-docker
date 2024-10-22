@@ -16,7 +16,6 @@ FROM "${DOCKER_HUB_PROXY}python:3.8-slim-bookworm" AS php-base
     RUN echo "deb [signed-by=/usr/share/keyrings/deb.sury.org-php.gpg] https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/php.list
     RUN apt-get update
 
-
 FROM php-base AS composer-build
     ENV DEBIAN_FRONTEND noninteractive
     ENV COMPOSER_ALLOW_SUPERUSER 1
@@ -54,7 +53,8 @@ FROM php-base AS composer-build
         # docker image specific dependencies
         elasticsearch/elasticsearch:^8.7.0 \
         jakub-onderka/openid-connect-php:^1.0.0 \
-        aws/aws-sdk-php
+        aws/aws-sdk-php \
+        cakephp/debug_kit:^2.2.0
 
 
 FROM php-base AS php-build
@@ -218,6 +218,7 @@ FROM php-base
         zip unzip \
         # Require for advanced an unattended configuration
         curl jq \
+        nano \
         && apt-get autoremove -y && apt-get clean -y && rm -rf /var/lib/apt/lists/*
 
     RUN update-alternatives --set php /usr/bin/php7.4
