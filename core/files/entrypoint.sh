@@ -9,22 +9,22 @@ export NUM_WORKERS_CACHE=${NUM_WORKERS_CACHE:-${WORKERS:-5}}
 
 export MYSQL_HOST=${MYSQL_HOST:-db}
 export MYSQL_PORT=${MYSQL_PORT:-3306}
-export MYSQL_USER=${MYSQL_USER:-infitip}
-export MYSQL_PASSWORD=${MYSQL_PASSWORD:-dvMY90PFXEy7}
-export MYSQL_DATABASE=${MYSQL_DATABASE:-infitip-hcl}
+export MYSQL_USER=${MYSQL_USER:-infitipdocker}
+export MYSQL_PASSWORD=${MYSQL_PASSWORD:-hcl@123}
+export MYSQL_DATABASE=${MYSQL_DATABASE:-infitiphcl}
 export MYSQL_CMD="mysql -u $MYSQL_USER -p$MYSQL_PASSWORD -P $MYSQL_PORT -h $MYSQL_HOST -r -N $MYSQL_DATABASE"
 export REDIS_HOST=${REDIS_HOST:-redis}
 export REDIS_PORT=${REDIS_PORT:-6379}
 export REDIS_PASSWORD=${REDIS_PASSWORD:-redispassword}
 export CRON_USER_ID=${CRON_USER_ID:-1}
-export BASE_URL=${BASE_URL:-https://localhost}
+export BASE_URL=${BASE_URL:-https://127.0.0.1}
 export DISABLE_IPV6=${DISABLE_IPV6:-false}
 export DISABLE_SSL_REDIRECT=${DISABLE_SSL_REDIRECT:-false}
 export SMTP_FQDN=${SMTP_FQDN:-mail}
 
-export ADMIN_EMAIL=${ADMIN_EMAIL:-admin@admin.test}
+export ADMIN_EMAIL=${ADMIN_EMAIL:-admin@infinitylabs.in}
 export GPG_PASSPHRASE=${GPG_PASSPHRASE:-passphrase}
-export MISP_MODULES_FQDN=${MISP_MODULES_FQDN:-http://misp-modules}
+export MISP_MODULES_FQDN=${MISP_MODULES_FQDN:-https://infitip-modules}
 
 export AUTOCONF_GPG=${AUTOCONF_GPG:-true}
 export AUTOCONF_ADMIN_KEY=${AUTOCONF_ADMIN_KEY:-true}
