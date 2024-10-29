@@ -40,22 +40,30 @@ FROM php-base AS composer-build
 
     WORKDIR /tmp
     #ADD https://raw.githubusercontent.com/MISP/MISP/${CORE_COMMIT:-${CORE_TAG}}/app/composer.json /tmp
-	COPY infitip/app/composer.json /tmp
+    COPY infitip/app/composer.json /tmp
     COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
     RUN composer config --no-interaction allow-plugins.composer/installers true
     RUN composer install
-    RUN composer require --with-all-dependencies --no-interaction \
-        supervisorphp/supervisor:^4.0 \
-        guzzlehttp/guzzle:^7.4.5 \
-        lstrojny/fxmlrpc \
-        php-http/message \
-        php-http/message-factory \
-        # docker image specific dependencies
-        elasticsearch/elasticsearch:^8.7.0 \
-        jakub-onderka/openid-connect-php:^1.0.0 \
-        aws/aws-sdk-php \
-        cakephp/debug_kit:^2.2.0
+    #RUN composer require --with-all-dependencies --no-interaction \
+    #    elasticsearch/elasticsearch:^8.7.0 \
+    #    jakub-onderka/openid-connect-php:^1.0.0 \
+    #    aws/aws-sdk-php
 
+    #RUN composer require --with-all-dependencies --no-interaction \
+    #    supervisorphp/supervisor:^4.0 \
+    #    guzzlehttp/guzzle:^7.4.5 \
+    #    lstrojny/fxmlrpc \
+    #    php-http/message \
+    #    php-http/message-factory \
+    #    # docker image specific dependencies
+    #    elasticsearch/elasticsearch:^8.7.0 \
+    #    jakub-onderka/openid-connect-php:^1.0.0 \
+    #    aws/aws-sdk-php
+
+    #RUN composer install --no-dev
+    RUN composer require cakephp/debug_kit:^2.2.0
+    #RUN composer require kamisama/cake-resque": "4.1.2
+    #RUN composer require http-interop/http-factory-guzzle:^1.2
 
 FROM php-base AS php-build
     ENV DEBIAN_FRONTEND noninteractive
