@@ -82,7 +82,7 @@ init_misp_data_files(){
 class EmailConfig {
     public \$default = array(
         'transport'     => 'Smtp',
-        'from'          => array('misp-dev@admin.test' => 'Misp DEV'),
+        'from'          => array('infinity-dev@admin.test' => 'Infinity DEV'),
         'host'          => '$SMTP_FQDN',
         'port'          => 25,
         'timeout'       => 30,
@@ -91,7 +91,7 @@ class EmailConfig {
     );
     public \$smtp = array(
         'transport'     => 'Smtp',
-        'from'          => array('misp-dev@admin.test' => 'Misp DEV'),
+        'from'          => array('infinity-dev@admin.test' => 'Infinity DEV'),
         'host'          => '$SMTP_FQDN',
         'port'          => 25,
         'timeout'       => 30,
