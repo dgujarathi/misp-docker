@@ -44,6 +44,13 @@ FROM php-base AS composer-build
     COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
     RUN composer config --no-interaction allow-plugins.composer/installers true
     RUN composer install
+
+    RUN composer require --with-all-dependencies supervisorphp/supervisor:^4.0 \
+    guzzlehttp/guzzle \
+    php-http/message \
+    php-http/message-factory \
+    lstrojny/fxmlrpc
+
     #RUN composer require --with-all-dependencies --no-interaction \
     #    elasticsearch/elasticsearch:^8.7.0 \
     #    jakub-onderka/openid-connect-php:^1.0.0 \
