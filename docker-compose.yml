@@ -80,7 +80,8 @@ services:
       db:
         condition: service_healthy
     healthcheck:
-      test: curl -ks ${BASE_URL:-https://localhost}/users/heartbeat > /dev/null || exit 1
+     # test: curl -ks ${BASE_URL:-https://localhost}/users/heartbeat > /dev/null || exit 1
+      test: curl -ks https://localhost/users/heartbeat > /dev/null || exit 1
       interval: 2s
       timeout: 1s
       retries: 3
@@ -91,7 +92,8 @@ services:
     #  - "443:443"
     volumes:
       - "./configs/:/var/www/infitip-engine/app/Config/"
-      - "./logs/:/var/www/infitip-engine/app/tmp/logs/"
+      #- "./logs/:/var/www/infitip-engine/app/tmp/logs/"
+      - "shared-logs:/var/www/infitip-engine/app/tmp/logs"
       - "./files/:/var/www/infitip-engine/app/files/"
       - "./ssl/:/etc/nginx/certs/"
       - "./gnupg/:/var/www/infitip-engine/.gnupg/"
@@ -197,6 +199,7 @@ services:
       - "PHP_UPLOAD_MAX_FILESIZE=${PHP_UPLOAD_MAX_FILESIZE:-50M}"
       - "PHP_POST_MAX_SIZE=${PHP_POST_MAX_SIZE:-50M}"
       - "PHP_MAX_INPUT_TIME:${PHP_MAX_INPUT_TIME:-300}"
+      - "MISP_MODULES_FQDN:${MISP_MODULES_FQDN:-http://infitip-modules:6666}"
   
   infitip-modules:
     image: ghcr.io/misp/misp-docker/misp-modules:${MODULES_RUNNING_TAG:-latest}
@@ -225,6 +228,8 @@ services:
         condition: service_healthy
       db:
         condition: service_healthy
+    volumes:
+      - shared-logs:/var/www/infitip/app/tmp/logs
 
   nginx:
     image: nginx:latest
@@ -240,3 +245,4 @@ services:
 
 volumes:
     mysql_data:
+    shared-logs:
