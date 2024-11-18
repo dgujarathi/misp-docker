@@ -198,8 +198,10 @@ services:
       - "PHP_MAX_EXECUTION_TIME=${PHP_MAX_EXECUTION_TIME:-300}"
       - "PHP_UPLOAD_MAX_FILESIZE=${PHP_UPLOAD_MAX_FILESIZE:-50M}"
       - "PHP_POST_MAX_SIZE=${PHP_POST_MAX_SIZE:-50M}"
-      - "PHP_MAX_INPUT_TIME:${PHP_MAX_INPUT_TIME:-300}"
-      - "MISP_MODULES_FQDN:${MISP_MODULES_FQDN:-http://infitip-modules:6666}"
+      - "PHP_MAX_INPUT_TIME=${PHP_MAX_INPUT_TIME:-300}"
+      - "MISP_MODULES_FQDN=${MISP_MODULES_FQDN:-http://infitip-modules:6666}"
+      # Timezone settings
+      - "TZ=Asia/Kolkata"
   
   infitip-modules:
     image: ghcr.io/misp/misp-docker/misp-modules:${MODULES_RUNNING_TAG:-latest}
@@ -230,6 +232,8 @@ services:
         condition: service_healthy
     volumes:
       - shared-logs:/var/www/infitip/app/tmp/logs
+    environment:
+      - "TZ=Asia/Kolkata"
 
   nginx:
     image: nginx:latest
