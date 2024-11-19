@@ -22,7 +22,7 @@ FROM php-base AS composer-build
     ARG CORE_TAG
     ARG CORE_COMMIT
 
-    RUN apt-get install -y --no-install-recommends \
+    RUN apt-get update && apt-get install -y --no-install-recommends \
         php7.4 \
         php7.4-apcu \
         php7.4-curl \
